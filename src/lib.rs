@@ -20,6 +20,3 @@ impl From<byteorder::Error> for Error {
         Error::Byteorder(err)
     }
 }
-
-#[test]
-fn it_works() {}

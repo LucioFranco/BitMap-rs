@@ -1,5 +1,5 @@
 use std::io::{Write, Read, Seek, SeekFrom};
-use byteorder::{LittleEndian, ReadBytesExt};
+use byteorder::{LittleEndian, BigEndian, ReadBytesExt};
 use super::Error;
 
 pub struct BitMapHeader<B: Write + Read + Seek> {
@@ -18,7 +18,7 @@ impl<B: Write + Read + Seek> BitMapHeader<B> {
     pub fn load(&mut self) -> Result<(), Error> {
         let mut header = &mut self.meta_data;
         let mut buf = &mut self.buf;
-
+        try!(buf.read_u16::<LittleEndian>());
         header.bfSize = try!(buf.read_u32::<LittleEndian>());
         header.zero = try!(buf.read_u32::<LittleEndian>());
         header.bfOffBits = try!(buf.read_u32::<LittleEndian>());
@@ -37,9 +37,14 @@ impl<B: Write + Read + Seek> BitMapHeader<B> {
 
         Ok(())
     }
+
+    /// Returns (width, height)
+    pub fn get_size(&self) -> (u32, u32) {
+        (self.meta_data.biWidth, self.meta_data.biHeight)
+    }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 // TODO: remove allow dead_code
 #[allow(non_snake_case, dead_code)]
 struct BitMapHeaderMetadata {
@@ -58,4 +63,20 @@ struct BitMapHeaderMetadata {
     biYPelsPerMeter: u32,
     biClrUsed: u32,
     biClrImportant: u32,
+}
+
+#[cfg(test)]
+mod test {
+    use std::fs::File;
+    use super::*;
+
+    #[test]
+    fn header() {
+        let mut buf = File::open("test/train.bmp").unwrap();
+
+        let mut header = BitMapHeader::new(buf);
+        header.load();
+
+        assert_eq!((1000, 666), header.get_size())
+    }
 }
