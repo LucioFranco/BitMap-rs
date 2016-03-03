@@ -18,6 +18,7 @@ impl<B: Write + Read + Seek> BitMapHeader<B> {
     pub fn load(&mut self) -> Result<(), Error> {
         let mut header = &mut self.meta_data;
         let mut buf = &mut self.buf;
+
         try!(buf.read_u16::<LittleEndian>());
         header.bfSize = try!(buf.read_u32::<LittleEndian>());
         header.zero = try!(buf.read_u32::<LittleEndian>());
