@@ -12,19 +12,20 @@ pub mod bitmap;
 
 use std::fs::{OpenOptions, File};
 use std::io;
-use bitmap::BitMapHeader;
+use bitmap::Header;
 
 pub struct BitMap {
-    header: BitMapHeader<File>,
+    header: Header<File>,
 }
 
+// TODO: have bitmap support any buffer
 impl BitMap {
     pub fn load(file: &str) -> Result<Self, Error> {
         let buf = try!(OpenOptions::new()
                            .read(true)
                            .open(file));
 
-        let mut header = BitMapHeader::new(buf);
+        let mut header = Header::new(buf);
         try!(header.load());
 
         Ok(BitMap { header: header })

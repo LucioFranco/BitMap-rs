@@ -4,16 +4,16 @@ use byteorder::{LittleEndian, BigEndian, ReadBytesExt};
 use super::image::{Image, Pixel};
 use super::Error;
 
-pub struct BitMapHeader<B: Write + Read + Seek> {
+pub struct Header<B: Write + Read + Seek> {
     buf: B,
-    meta_data: BitMapHeaderMetadata,
+    meta_data: HeaderMetadata,
 }
 
-impl<B: Write + Read + Seek> BitMapHeader<B> {
+impl<B: Write + Read + Seek> Header<B> {
     pub fn new(buf: B) -> Self {
-        BitMapHeader {
+        Header {
             buf: buf,
-            meta_data: BitMapHeaderMetadata::new(),
+            meta_data: HeaderMetadata::new(),
         }
     }
 
@@ -52,7 +52,7 @@ impl<B: Write + Read + Seek> BitMapHeader<B> {
 #[derive(Debug)]
 // TODO: remove allow dead_code
 #[allow(non_snake_case, dead_code)]
-struct BitMapHeaderMetadata {
+struct HeaderMetadata {
     bfSize: u32,
     zero: u32,
     bfOffBits: u32,
@@ -70,29 +70,9 @@ struct BitMapHeaderMetadata {
     biClrImportant: u32,
 }
 
-pub struct BitMapBody<B: Write + Read + Seek> {
-    buf: B,
-    meta_data: BitMapBodyMetadata,
-}
-
-#[derive(Debug)]
-struct BitMapBodyMetadata {
-    image: Image,
-    bit_count: u16,
-}
-
-impl BitMapBodyMetadata {
-    fn new(bit_count: u16) -> Self {
-        BitMapBodyMetadata {
-            image: Image::new(),
-            bit_count: bit_count,
-        }
-    }
-}
-
-impl BitMapHeaderMetadata {
+impl HeaderMetadata {
     fn new() -> Self {
-        BitMapHeaderMetadata {
+        HeaderMetadata {
             bfSize: 0,
             zero: 0,
             bfOffBits: 52,
@@ -108,6 +88,26 @@ impl BitMapHeaderMetadata {
             biYPelsPerMeter: 2835,
             biClrUsed: 0,
             biClrImportant: 0,
+        }
+    }
+}
+
+pub struct Body<B: Write + Read + Seek> {
+    buf: B,
+    meta_data: BodyMetadata,
+}
+
+#[derive(Debug)]
+struct BodyMetadata {
+    image: Image,
+    bit_count: u16,
+}
+
+impl BodyMetadata {
+    fn new(bit_count: u16) -> Self {
+        BodyMetadata {
+            image: Image::new(),
+            bit_count: bit_count,
         }
     }
 }
