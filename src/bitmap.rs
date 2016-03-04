@@ -1,5 +1,7 @@
 use std::io::{Write, Read, Seek, SeekFrom};
 use byteorder::{LittleEndian, BigEndian, ReadBytesExt};
+
+use super::image::{Image, Pixel};
 use super::Error;
 
 pub struct BitMapHeader<B: Write + Read + Seek> {
@@ -11,7 +13,7 @@ impl<B: Write + Read + Seek> BitMapHeader<B> {
     pub fn new(buf: B) -> Self {
         BitMapHeader {
             buf: buf,
-            meta_data: BitMapHeaderMetadata::default(),
+            meta_data: BitMapHeaderMetadata::new(),
         }
     }
 
@@ -39,13 +41,15 @@ impl<B: Write + Read + Seek> BitMapHeader<B> {
         Ok(())
     }
 
+    // TODO: Implement BitMapHeader Save
+
     /// Returns (width, height)
     pub fn get_size(&self) -> (u32, u32) {
         (self.meta_data.biWidth, self.meta_data.biHeight)
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 // TODO: remove allow dead_code
 #[allow(non_snake_case, dead_code)]
 struct BitMapHeaderMetadata {
@@ -64,6 +68,48 @@ struct BitMapHeaderMetadata {
     biYPelsPerMeter: u32,
     biClrUsed: u32,
     biClrImportant: u32,
+}
+
+pub struct BitMapBody<B: Write + Read + Seek> {
+    buf: B,
+    meta_data: BitMapBodyMetadata,
+}
+
+#[derive(Debug)]
+struct BitMapBodyMetadata {
+    image: Image,
+    bit_count: u16,
+}
+
+impl BitMapBodyMetadata {
+    fn new(bit_count: u16) -> Self {
+        BitMapBodyMetadata {
+            image: Image::new(),
+            bit_count: bit_count,
+        }
+    }
+}
+
+impl BitMapHeaderMetadata {
+    fn new() -> Self {
+        BitMapHeaderMetadata {
+            bfSize: 0,
+            zero: 0,
+            bfOffBits: 52,
+
+            biSize: 40,
+            biWidth: 0,
+            biHeight: 0,
+            biPlanes: 1,
+            biBitCount: 32, // TODO: update so you can create 24-bit images aswell
+            biCompression: 0,
+            biSizeImage: 0,
+            biXPelsPerMeter: 2835,
+            biYPelsPerMeter: 2835,
+            biClrUsed: 0,
+            biClrImportant: 0,
+        }
+    }
 }
 
 #[cfg(test)]

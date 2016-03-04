@@ -1,6 +1,7 @@
 use core::borrow::{Borrow, BorrowMut};
 
 /// `Image` represents the internal storage of the image
+#[derive(Debug)]
 pub struct Image {
     data: Box<Vec<u8>>,
     width: u32,
