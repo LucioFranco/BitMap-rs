@@ -12,26 +12,22 @@ pub mod bitmap;
 
 use std::fs::{OpenOptions, File};
 use std::io;
+use std::io::{Write, Read, Seek};
 use bitmap::Header;
 
 pub struct BitMap {
-    header: Header<File>,
+    header: Header,
 }
 
 // TODO: have bitmap support any buffer
 impl BitMap {
-    pub fn load(file: &str) -> Result<Self, Error> {
-        let buf = try!(OpenOptions::new()
-                           .read(true)
-                           .open(file));
-
-        let mut header = Header::new(buf);
-        try!(header.load());
+    pub fn load<B: Write + Read + Seek>(mut buf: &mut B) -> Result<Self, Error> {
+        let mut header = Header::new();
+        try!(header.load(&mut buf));
 
         Ok(BitMap { header: header })
     }
 }
-
 
 pub enum Error {
     ReadHeader,
