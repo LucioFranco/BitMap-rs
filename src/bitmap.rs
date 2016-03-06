@@ -47,6 +47,8 @@ impl Header {
     }
 
     pub fn load<B: Write + Read + Seek>(&mut self, buf: &mut B) -> Result<(), Error> {
+        try!(buf.seek(SeekFrom::Start(0)));
+        
         try!(buf.read_u16::<LittleEndian>());
         self.bfSize = try!(buf.read_u32::<LittleEndian>());
         self.zero = try!(buf.read_u32::<LittleEndian>());
@@ -70,6 +72,8 @@ impl Header {
     }
 
     pub fn save<B: Write + Read + Seek>(&mut self, buf: &mut B) -> Result<(), Error> {
+        try!(buf.seek(SeekFrom::Start(0)));
+        
         try!(buf.write_u16::<LittleEndian>(19778));
 
         try!(buf.write_u32::<LittleEndian>(self.bfSize));
