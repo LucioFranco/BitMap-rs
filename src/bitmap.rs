@@ -4,7 +4,7 @@ use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use super::image::{Image, Pixel};
 use super::Error;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 // TODO: remove allow dead_code
 #[allow(non_snake_case, dead_code)]
 pub struct Header {
@@ -70,7 +70,7 @@ impl Header {
     }
 
     pub fn save<B: Write + Read + Seek>(&mut self, buf: &mut B) -> Result<(), Error> {
-        try!(buf.write_u16::<LittleEndian>(0));
+        try!(buf.write_u16::<LittleEndian>(19778));
 
         try!(buf.write_u32::<LittleEndian>(self.bfSize));
         try!(buf.write_u32::<LittleEndian>(self.zero));
@@ -127,7 +127,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn header() {
+    fn header_load() {
         let mut buf = File::open("test/train.bmp").unwrap();
 
         let mut header = Header::new();
@@ -136,5 +136,19 @@ mod test {
         assert_eq!((1000, 666), header.get_size())
     }
 
-    // TODO: write test for Save header
+    #[test]
+    fn header_save() {
+        let mut header1 = Header::new();
+        header1.biWidth = 100;
+        header1.biHeight = 200;
+
+        let mut buf1 = File::create("target/test1.bmp").unwrap();
+        header1.save(&mut buf1);
+
+        let mut header2 = Header::new();
+        let mut buf2 = File::open("target/test1.bmp").unwrap();
+        header2.load(&mut buf2);
+
+        assert_eq!(header1, header2);
+    }
 }
