@@ -10,7 +10,6 @@ extern crate byteorder;
 pub mod image;
 pub mod bitmap;
 
-use std::fs::{OpenOptions, File};
 use std::io;
 use std::io::{Write, Read, Seek};
 use bitmap::Header;
