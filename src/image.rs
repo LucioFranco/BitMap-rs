@@ -19,9 +19,10 @@ impl Image {
     }
 
     /// Create Image with certain height and width
-    pub fn with_size(height: u32, width: u32) -> Self {
+    pub fn with_size(width: u32, height: u32) -> Self {
+        println!("{}", (width * height) as usize);
         Image {
-            data: Box::new(Vec::<u8>::with_capacity((height * width) as usize)),
+            data: Box::new(vec![0u8; (height * width * 4) as usize]),
             width: width,
             height: height,
         }
@@ -30,10 +31,10 @@ impl Image {
     pub fn get_pixel(&self, x: u32, y: u32) -> Pixel {
         let data: &Vec<u8> = self.data.borrow();
 
-        let pixel = (data[(y * self.height + x * self.width) as usize],
-                     data[(y * self.height + x * self.width + 1) as usize],
-                     data[(y * self.height + x * self.width + 2) as usize],
-                     data[(y * self.height + x * self.width + 3) as usize]);
+        let pixel = (data[(y * self.height * 4 + x * self.width * 4) as usize],
+                     data[(y * self.height * 4 + x * self.width * 4 + 1) as usize],
+                     data[(y * self.height * 4 + x * self.width * 4 + 2) as usize],
+                     data[(y * self.height * 4 + x * self.width * 4 + 3) as usize]);
 
         Pixel::from(pixel)
     }
@@ -41,14 +42,15 @@ impl Image {
     pub fn set_pixel(&mut self, x: u32, y: u32, p: Pixel) {
         let data: &mut Vec<u8> = self.data.borrow_mut();
 
-        data[(y * self.height + x * self.width) as usize] = p.b;
-        data[(y * self.height + x * self.width + 1) as usize] = p.g;
-        data[(y * self.height + x * self.width + 2) as usize] = p.r;
-        data[(y * self.height + x * self.width + 3) as usize] = p.a;
+        data[(y * self.width * 4 + x * 4) as usize] = p.b;
+        data[(y * self.width * 4 + x * 4 + 1) as usize] = p.g;
+        data[(y * self.width * 4 + x * 4 + 2) as usize] = p.r;
+        data[(y * self.width * 4 + x * 4 + 3) as usize] = p.a;
     }
 }
 
-/// `Pixel` represents the B, G, R, A format of BitMap images 
+/// `Pixel` represents the B, G, R, A format of BitMap images
+#[derive(Debug, Clone, Default)]
 pub struct Pixel {
     pub b: u8,
     pub g: u8,

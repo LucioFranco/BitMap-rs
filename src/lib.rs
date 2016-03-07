@@ -7,12 +7,13 @@
 extern crate core;
 extern crate byteorder;
 
-pub mod image;
-pub mod bitmap;
+mod image;
+mod bitmap;
 
 use std::io;
 use std::io::{Write, Read, Seek};
-use bitmap::Header;
+
+pub use bitmap::{Header, Body};
 
 pub struct BitMap {
     header: Header,

@@ -55,7 +55,7 @@ impl Header {
 
         self.biSize = try!(buf.read_u32::<LittleEndian>());
         self.biWidth = try!(buf.read_u32::<LittleEndian>());
-        self.biHeight = try!(buf.read_u32::<LittleEndian>());
+        self.biHeight = Self::handle_reverse_height(try!(buf.read_i32::<LittleEndian>()));
 
         self.biPlanes = try!(buf.read_u16::<LittleEndian>());
         self.biBitCount = try!(buf.read_u16::<LittleEndian>());
@@ -101,27 +101,63 @@ impl Header {
     pub fn get_size(&self) -> (u32, u32) {
         (self.biWidth, self.biHeight)
     }
+
+    fn handle_reverse_height(height: i32) -> u32 {
+        if height < 0 {
+            (height * -1) as u32
+        } else {
+            height as u32
+        }
+    }
 }
 
 pub struct Body {
     image: Image,
-    bit_count: u16,
+    header: Header,
 }
 
 impl Body {
-    pub fn new(bit_count: u16) -> Self {
+    pub fn new(header: Header) -> Self {
         Body {
-            image: Image::new(),
-            bit_count: bit_count,
+            image: Image::with_size(header.biWidth, header.biHeight),
+            header: header,
         }
     }
 
-    pub fn load<B: Read + Seek>(&mut self, buf: &mut B) -> Result<(), Error> {
-        // TODO: write load
+    pub fn load<B: Read + Seek>(&mut self, mut buf: &mut B) -> Result<(), Error> {
+        try!(buf.seek(SeekFrom::Start((self.header.bfOffBits as u64) - 1)));
+
+        let width = self.header.biWidth;
+        let height = self.header.biHeight;
+
+        if self.header.biBitCount == 32u16 {
+            try!(self.load_32(&mut buf, width, height));
+        }
+        // TODO: Write 24bit load
+
         Ok(())
     }
 
-    fn load_u32(&mut self, reverse: bool) {}
+    fn load_32<B: Read + Seek>(&mut self,
+                               buf: &mut B,
+                               width: u32,
+                               height: u32)
+                               -> Result<(), Error> {
+        for y in 0..height {
+            for x in 0..width {
+                let mut pixel = Pixel::default();
+
+                pixel.b = try!(buf.read_u8());
+                pixel.g = try!(buf.read_u8());
+                pixel.r = try!(buf.read_u8());
+                pixel.a = try!(buf.read_u8());
+
+                self.image.set_pixel(x, y, pixel);
+            }
+        }
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -153,5 +189,16 @@ mod test {
         header2.load(&mut buf2);
 
         assert_eq!(header1, header2);
+    }
+
+    #[test]
+    fn body_load_32bit() {
+        let mut img = File::open("test/mountain.bmp").unwrap();
+
+        let mut header = Header::new();
+        assert!(header.load(&mut img).is_ok());
+
+        let mut body = Body::new(header);
+        assert!(body.load(&mut img).is_ok());
     }
 }
