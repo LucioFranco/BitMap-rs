@@ -1,8 +1,7 @@
-use core::borrow::{Borrow, BorrowMut};
-
 /// `Image` represents the internal storage of the image
 #[derive(Debug)]
 pub struct Image {
+    // TODO: remove box<vec> use Box<T> and Vec::into_boxed_slice
     data: Box<Vec<u8>>,
     width: u32,
     height: u32,
@@ -29,7 +28,7 @@ impl Image {
     }
 
     pub fn get_pixel(&self, x: u32, y: u32) -> Pixel {
-        let data: &Vec<u8> = self.data.borrow();
+        let data = &*self.data;
 
         let pixel = (data[(y * self.height * 4 + x * self.width * 4) as usize],
                      data[(y * self.height * 4 + x * self.width * 4 + 1) as usize],
@@ -40,7 +39,7 @@ impl Image {
     }
 
     pub fn set_pixel(&mut self, x: u32, y: u32, p: Pixel) {
-        let data: &mut Vec<u8> = self.data.borrow_mut();
+        let data = &mut *self.data;
 
         data[(y * self.width * 4 + x * 4) as usize] = p.b;
         data[(y * self.width * 4 + x * 4 + 1) as usize] = p.g;
