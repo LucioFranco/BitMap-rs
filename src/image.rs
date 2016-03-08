@@ -2,7 +2,7 @@
 #[derive(Debug)]
 pub struct Image {
     // TODO: remove box<vec> use Box<T> and Vec::into_boxed_slice
-    data: Box<Vec<u8>>,
+    data: Box<[u8]>,
     width: u32,
     height: u32,
 }
@@ -11,7 +11,7 @@ impl Image {
     /// Create Empty Image
     pub fn new() -> Self {
         Image {
-            data: Box::new(Vec::<u8>::new()),
+            data: Box::new([0; 0]),
             width: 0,
             height: 0,
         }
@@ -19,9 +19,10 @@ impl Image {
 
     /// Create Image with certain height and width
     pub fn with_size(width: u32, height: u32) -> Self {
-        println!("{}", (width * height) as usize);
+        let v = vec![0u8; (height * width * 4) as usize];
+
         Image {
-            data: Box::new(vec![0u8; (height * width * 4) as usize]),
+            data: v.into_boxed_slice(),
             width: width,
             height: height,
         }
