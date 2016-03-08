@@ -125,7 +125,7 @@ impl Body {
     }
 
     pub fn load<B: Read + Seek>(&mut self, mut buf: &mut B) -> Result<(), Error> {
-        try!(buf.seek(SeekFrom::Start((self.header.bfOffBits as u64) - 1)));
+        try!(buf.seek(SeekFrom::Start((self.header.bfOffBits as u64))));
 
         let width = self.header.biWidth;
         let height = self.header.biHeight;
@@ -155,6 +155,15 @@ impl Body {
                 self.image.set_pixel(x, y, pixel);
             }
         }
+
+        Ok(())
+    }
+
+    pub fn save<B: Write + Seek>(&mut self, mut buf: &mut B) -> Result<(), Error> {
+        try!(buf.seek(SeekFrom::Start(self.header.bfOffBits as u64)));
+
+        // TODO: Write save_32
+        unimplemented!();
 
         Ok(())
     }
