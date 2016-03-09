@@ -46,7 +46,7 @@ impl Header {
         }
     }
 
-    pub fn load<B: Write + Read + Seek>(&mut self, buf: &mut B) -> Result<(), Error> {
+    pub fn load<B: Read + Seek>(&mut self, buf: &mut B) -> Result<(), Error> {
         try!(buf.seek(SeekFrom::Start(0)));
 
         try!(buf.read_u16::<LittleEndian>());
@@ -71,7 +71,7 @@ impl Header {
         Ok(())
     }
 
-    pub fn save<B: Write + Read + Seek>(&mut self, buf: &mut B) -> Result<(), Error> {
+    pub fn save<B: Write + Seek>(&mut self, buf: &mut B) -> Result<(), Error> {
         try!(buf.seek(SeekFrom::Start(0)));
 
         try!(buf.write_u16::<LittleEndian>(19778));
@@ -140,6 +140,7 @@ impl Body {
         let height = self.header.biHeight;
         let bit_count = self.header.biBitCount;
 
+        // Load 32 bit image
         if bit_count == 32u16 {
             for y in 0..height {
                 for x in 0..width {
@@ -153,7 +154,9 @@ impl Body {
                     self.image.set_pixel(x, y, pixel);
                 }
             }
+            // load 24 bit image
         } else if bit_count == 24u16 {
+            self.header.biBitCount = 32; // TODO: Remove this and impl 24bit save
             let padding = (4 - (width as i64 * 3) & 3) & 3;
 
             for y in 0..height {
@@ -176,6 +179,7 @@ impl Body {
     }
 
     pub fn save<B: Write + Seek>(&mut self, mut buf: &mut B) -> Result<(), Error> {
+        try!(self.header.save(&mut buf));
         try!(buf.seek(SeekFrom::Start(self.header.bfOffBits as u64)));
 
         let width = self.header.biWidth;
@@ -203,14 +207,14 @@ mod test {
 
     #[test]
     fn header_load() {
-        let mut buf = File::open("test/train.bmp").unwrap();
+        let mut buf = File::open("images/train.bmp").unwrap();
 
         let mut header = Header::new();
         header.load(&mut buf);
 
         assert_eq!((1000, 666), header.get_size());
 
-        let mut buf2 = File::open("test/mountain.bmp").unwrap();
+        let mut buf2 = File::open("images/mountain.bmp").unwrap();
         let mut header = Header::new();
 
         header.load(&mut buf2);
@@ -236,7 +240,7 @@ mod test {
 
     #[test]
     fn body_load_32bit() {
-        let mut img = File::open("test/mountain.bmp").unwrap();
+        let mut img = File::open("images/mountain.bmp").unwrap();
 
         let mut header = Header::new();
         assert!(header.load(&mut img).is_ok());
@@ -248,7 +252,7 @@ mod test {
 
     #[test]
     fn body_load_24bit() {
-        let mut img = File::open("test/train.bmp").unwrap();
+        let mut img = File::open("images/train.bmp").unwrap();
 
         let mut header = Header::new();
         assert!(header.load(&mut img).is_ok());
@@ -260,7 +264,7 @@ mod test {
 
     #[test]
     fn body_save_32bit() {
-        let mut img = File::open("test/mountain.bmp").unwrap();
+        let mut img = File::open("images/mountain.bmp").unwrap();
 
         let mut header = Header::new();
         assert!(header.load(&mut img).is_ok());
@@ -276,7 +280,7 @@ mod test {
 
     #[test]
     fn body_save_24bit() {
-        let mut img = File::open("test/train.bmp").unwrap();
+        let mut img = File::open("images/train.bmp").unwrap();
 
         let mut header = Header::new();
         assert!(header.load(&mut img).is_ok());
@@ -284,7 +288,7 @@ mod test {
         let mut body = Body::new(header.clone());
         assert!(body.load(&mut img).is_ok());
 
-        // TODO: check to see if image is actually the same
+        // Can't test to see if they are the same because we only save in 32bit format right now
         let mut img2 = File::create("target/train new.bmp").unwrap();
         assert!(header.save(&mut img2).is_ok());
         assert!(body.save(&mut img2).is_ok());
