@@ -1,7 +1,8 @@
+use core::ops::{Deref, DerefMut};
+
 /// `Image` represents the internal storage of the image
 #[derive(Debug)]
 pub struct Image {
-    // TODO: remove box<vec> use Box<T> and Vec::into_boxed_slice
     data: Box<[u8]>,
     width: u32,
     height: u32,
@@ -46,6 +47,19 @@ impl Image {
         data[(y * self.width * 4 + x * 4 + 1) as usize] = p.g;
         data[(y * self.width * 4 + x * 4 + 2) as usize] = p.r;
         data[(y * self.width * 4 + x * 4 + 3) as usize] = p.a;
+    }
+}
+
+impl Deref for Image {
+    type Target = Box<[u8]>;
+    fn deref(&self) -> &Self::Target {
+        &self.data
+    }
+}
+
+impl DerefMut for Image {
+    fn deref_mut(&mut self) -> &mut Box<[u8]> {
+        &mut self.data
     }
 }
 
