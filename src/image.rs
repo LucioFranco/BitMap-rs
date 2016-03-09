@@ -32,10 +32,10 @@ impl Image {
     pub fn get_pixel(&self, x: u32, y: u32) -> Pixel {
         let data = &*self.data;
 
-        let pixel = (data[(y * self.height * 4 + x * self.width * 4) as usize],
-                     data[(y * self.height * 4 + x * self.width * 4 + 1) as usize],
-                     data[(y * self.height * 4 + x * self.width * 4 + 2) as usize],
-                     data[(y * self.height * 4 + x * self.width * 4 + 3) as usize]);
+        let pixel = (data[(y * self.width * 4 + x * 4) as usize],
+                     data[(y * self.width * 4 + x * 4 + 1) as usize],
+                     data[(y * self.width * 4 + x * 4 + 2) as usize],
+                     data[(y * self.width * 4 + x * 4 + 3) as usize]);
 
         Pixel::from(pixel)
     }
