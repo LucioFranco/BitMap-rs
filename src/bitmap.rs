@@ -138,30 +138,37 @@ impl Body {
 
         let width = self.header.biWidth;
         let height = self.header.biHeight;
+        let bit_count = self.header.biBitCount;
 
-        if self.header.biBitCount == 32u16 {
-            try!(self.load_32(&mut buf, width, height));
-        }
-        // TODO: Write 24bit load
+        if bit_count == 32u16 {
+            for y in 0..height {
+                for x in 0..width {
+                    let mut pixel = Pixel::default();
 
-        Ok(())
-    }
+                    pixel.b = try!(buf.read_u8());
+                    pixel.g = try!(buf.read_u8());
+                    pixel.r = try!(buf.read_u8());
+                    pixel.a = try!(buf.read_u8());
 
-    fn load_32<B: Read + Seek>(&mut self,
-                               buf: &mut B,
-                               width: u32,
-                               height: u32)
-                               -> Result<(), Error> {
-        for y in 0..height {
-            for x in 0..width {
-                let mut pixel = Pixel::default();
+                    self.image.set_pixel(x, y, pixel);
+                }
+            }
+        } else if bit_count == 24u16 {
+            let padding = (4 - (width as i64 * 3) & 3) & 3;
 
-                pixel.b = try!(buf.read_u8());
-                pixel.g = try!(buf.read_u8());
-                pixel.r = try!(buf.read_u8());
-                pixel.a = try!(buf.read_u8());
+            for y in 0..height {
+                for x in 0..width {
+                    let mut pixel = Pixel::default();
 
-                self.image.set_pixel(x, y, pixel);
+                    pixel.b = try!(buf.read_u8());
+                    pixel.g = try!(buf.read_u8());
+                    pixel.r = try!(buf.read_u8());
+                    pixel.a = 255;
+
+                    self.image.set_pixel(x, y, pixel);
+                }
+
+                try!(buf.seek(SeekFrom::Current(padding)));
             }
         }
 
@@ -233,6 +240,19 @@ mod test {
 
         let mut header = Header::new();
         assert!(header.load(&mut img).is_ok());
+        assert_eq!(header.biBitCount, 32u16);
+
+        let mut body = Body::new(header);
+        assert!(body.load(&mut img).is_ok());
+    }
+
+    #[test]
+    fn body_load_24bit() {
+        let mut img = File::open("test/train.bmp").unwrap();
+
+        let mut header = Header::new();
+        assert!(header.load(&mut img).is_ok());
+        assert_eq!(header.biBitCount, 24u16);
 
         let mut body = Body::new(header);
         assert!(body.load(&mut img).is_ok());
@@ -250,6 +270,22 @@ mod test {
 
         // TODO: check to see if image is actually the same
         let mut img2 = File::create("target/mountain new.bmp").unwrap();
+        assert!(header.save(&mut img2).is_ok());
+        assert!(body.save(&mut img2).is_ok());
+    }
+
+    #[test]
+    fn body_save_24bit() {
+        let mut img = File::open("test/train.bmp").unwrap();
+
+        let mut header = Header::new();
+        assert!(header.load(&mut img).is_ok());
+
+        let mut body = Body::new(header.clone());
+        assert!(body.load(&mut img).is_ok());
+
+        // TODO: check to see if image is actually the same
+        let mut img2 = File::create("target/train new.bmp").unwrap();
         assert!(header.save(&mut img2).is_ok());
         assert!(body.save(&mut img2).is_ok());
     }
