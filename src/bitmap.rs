@@ -6,6 +6,7 @@ use super::Error;
 
 #[derive(Debug, PartialEq, Eq)]
 #[allow(non_snake_case)]
+/// `Header` represents a bitmap header
 pub struct Header {
     pub bfSize: u32,
     pub zero: u32,
@@ -111,6 +112,7 @@ impl Header {
     }
 }
 
+/// `Body` represents a bitmap header and `Image` of that `BitMap` image
 pub struct Body {
     image: Image,
     header: Header,
@@ -121,6 +123,13 @@ impl Body {
         Body {
             image: Image::with_size(header.biWidth, header.biHeight),
             header: header,
+        }
+    }
+
+    pub fn default() -> Self {
+        Body {
+            image: Image::new(),
+            header: Header::new(),
         }
     }
 
