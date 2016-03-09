@@ -4,7 +4,7 @@ use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use super::image::{Image, Pixel};
 use super::Error;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[allow(non_snake_case)]
 /// `Header` represents a bitmap header
 pub struct Header {
@@ -171,8 +171,19 @@ impl Body {
     pub fn save<B: Write + Seek>(&mut self, mut buf: &mut B) -> Result<(), Error> {
         try!(buf.seek(SeekFrom::Start(self.header.bfOffBits as u64)));
 
-        // TODO: Write save_32
-        unimplemented!();
+        let width = self.header.biWidth;
+        let height = self.header.biHeight;
+
+        for y in 0..height {
+            for x in 0..width {
+                let pixel = self.image.get_pixel(x, y);
+
+                try!(buf.write_u8(pixel.b));
+                try!(buf.write_u8(pixel.g));
+                try!(buf.write_u8(pixel.r));
+                try!(buf.write_u8(pixel.a));
+            }
+        }
 
         Ok(())
     }
@@ -190,7 +201,14 @@ mod test {
         let mut header = Header::new();
         header.load(&mut buf);
 
-        assert_eq!((1000, 666), header.get_size())
+        assert_eq!((1000, 666), header.get_size());
+
+        let mut buf2 = File::open("test/mountain.bmp").unwrap();
+        let mut header = Header::new();
+
+        header.load(&mut buf2);
+
+        assert_eq!((259, 194), header.get_size());
     }
 
     #[test]
@@ -218,5 +236,20 @@ mod test {
 
         let mut body = Body::new(header);
         assert!(body.load(&mut img).is_ok());
+    }
+
+    #[test]
+    fn body_save_32bit() {
+        let mut img = File::open("test/mountain.bmp").unwrap();
+
+        let mut header = Header::new();
+        assert!(header.load(&mut img).is_ok());
+
+        let mut body = Body::new(header.clone());
+        assert!(body.load(&mut img).is_ok());
+
+        let mut img2 = File::create("target/mountain new.bmp").unwrap();
+        assert!(header.save(&mut img2).is_ok());
+        assert!(body.save(&mut img2).is_ok());
     }
 }
