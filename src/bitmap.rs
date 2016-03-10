@@ -248,6 +248,7 @@ mod test {
         let mut body = Body::new(header.clone());
         assert!(body.load(&mut img).is_ok());
 
+        // TODO: check to see if image is actually the same
         let mut img2 = File::create("target/mountain new.bmp").unwrap();
         assert!(header.save(&mut img2).is_ok());
         assert!(body.save(&mut img2).is_ok());
