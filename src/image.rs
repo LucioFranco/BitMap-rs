@@ -48,6 +48,11 @@ impl Image {
         data[(y * self.width * 4 + x * 4 + 2) as usize] = p.r;
         data[(y * self.width * 4 + x * 4 + 3) as usize] = p.a;
     }
+
+    /// Returns the (width: u32, height: u32) of the image
+    pub fn get_size(&self) -> (u32, u32) {
+        (self.width, self.height)
+    }
 }
 
 impl Deref for Image {
