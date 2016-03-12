@@ -114,7 +114,7 @@ impl Header {
 
 /// `Body` represents a bitmap header and `Image` of that `BitMap` image
 pub struct Body {
-    image: Image,
+    pub image: Image,
     header: Header,
 }
 

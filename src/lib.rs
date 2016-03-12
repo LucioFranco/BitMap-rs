@@ -16,6 +16,7 @@ use std::io::{Write, Read, Seek};
 
 pub use bitmap::{Header, Body};
 pub use image::{Image, Pixel};
+pub use effect::Effect;
 
 /// `BitMap` represents a bitmap image with a `Header` and `Body`
 pub struct BitMap {
@@ -40,6 +41,10 @@ impl BitMap {
 
     pub fn save<B: Write + Seek>(&mut self, mut buf: &mut B) -> Result<(), Error> {
         self.body.save(&mut buf)
+    }
+
+    pub fn apply_effect<E: Effect>(&self, effect: E) -> Image {
+        effect.effect(&self.body.image)
     }
 }
 

@@ -1,7 +1,7 @@
 use super::image::Image;
 
 pub trait Effect {
-    fn effect(&Image) -> Image;
+    fn effect(&self, &Image) -> Image;
 }
 
 pub struct EdgeDetection {
@@ -9,7 +9,7 @@ pub struct EdgeDetection {
 }
 
 impl Effect for EdgeDetection {
-    fn effect(img: &Image) -> Image {
+    fn effect(&self, img: &Image) -> Image {
         unimplemented!();
     }
 }
