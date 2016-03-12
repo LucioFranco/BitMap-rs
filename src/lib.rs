@@ -9,6 +9,7 @@ extern crate byteorder;
 
 mod image;
 mod bitmap;
+mod effect;
 
 use std::io;
 use std::io::{Write, Read, Seek};
