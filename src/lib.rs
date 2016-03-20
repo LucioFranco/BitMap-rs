@@ -23,7 +23,6 @@ pub struct BitMap {
     body: Body,
 }
 
-// TODO: have bitmap support any buffer
 impl BitMap {
     pub fn new() -> Self {
         BitMap { body: Body::default() }
