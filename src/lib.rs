@@ -44,7 +44,7 @@ impl BitMap {
     }
 
     pub fn apply_effect<E: Effect>(&self, effect: E) -> Image {
-        effect.effect(&self.body.image)
+        effect.apply(&self.body.image)
     }
 }
 
