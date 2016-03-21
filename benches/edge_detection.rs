@@ -14,7 +14,7 @@ fn detect_edges(b: &mut Bencher) {
     let mut bm = BitMap::load(&mut buf).unwrap();
 
     b.iter(|| {
-        bm.apply_effect::<EdgeDetection>(EdgeDetection::default());
+        bm.apply_effect(EdgeDetection::default());
     });
 
 }
