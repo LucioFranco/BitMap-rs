@@ -16,7 +16,7 @@ use std::io::{Write, Read, Seek};
 
 pub use bitmap::{Header, Body};
 pub use image::{Image, Pixel};
-pub use effect::Effect;
+pub use effect::{Effect, EdgeDetection};
 
 /// `BitMap` represents a bitmap image with a `Header` and `Body`
 pub struct BitMap {
