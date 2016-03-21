@@ -16,14 +16,13 @@ use std::io::{Write, Read, Seek};
 
 pub use bitmap::{Header, Body};
 pub use image::{Image, Pixel};
-pub use effect::Effect;
+pub use effect::{Effect, EdgeDetection};
 
 /// `BitMap` represents a bitmap image with a `Header` and `Body`
 pub struct BitMap {
     body: Body,
 }
 
-// TODO: have bitmap support any buffer
 impl BitMap {
     pub fn new() -> Self {
         BitMap { body: Body::default() }
@@ -44,7 +43,7 @@ impl BitMap {
     }
 
     pub fn apply_effect<E: Effect>(&self, effect: E) -> Image {
-        effect.effect(&self.body.image)
+        effect.apply(&self.body.image)
     }
 }
 

@@ -8,7 +8,7 @@ fn main() {
     let mut bm = BitMap::load(&mut buf).unwrap();
 
     let mut new_buf = File::create("target/mountain example.bmp").unwrap();
-    bm.save(&mut buf);
+    bm.save(&mut new_buf);
 
     let mut buf = File::open("images/train.bmp").unwrap();
     let mut bm = BitMap::load(&mut buf).unwrap();
