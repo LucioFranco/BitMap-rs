@@ -46,6 +46,26 @@ impl Header {
         }
     }
 
+    pub fn with_size(width: u32, height: u32) -> Self {
+        Header {
+            bfSize: 0,
+            zero: 0,
+            bfOffBits: 52,
+
+            biSize: 40,
+            biWidth: width,
+            biHeight: height,
+            biPlanes: 1,
+            biBitCount: 32,
+            biCompression: 0,
+            biSizeImage: 0,
+            biXPelsPerMeter: 2835,
+            biYPelsPerMeter: 2835,
+            biClrUsed: 0,
+            biClrImportant: 0,
+        }
+    }
+
     pub fn load<B: Read + Seek>(&mut self, buf: &mut B) -> Result<(), Error> {
         try!(buf.seek(SeekFrom::Start(0)));
 

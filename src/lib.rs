@@ -28,6 +28,15 @@ impl BitMap {
         BitMap { body: Body::default() }
     }
 
+    // TODO: ablility to create bitmap from an Image
+    pub fn with_image(img: Image) -> Self {
+        let (width, height) = img.get_size();
+        let mut body = Body::new(Header::with_size(width, height));
+        body.image = img;
+
+        BitMap { body: body }
+    }
+
     pub fn load<B: Read + Seek>(mut buf: &mut B) -> Result<BitMap, Error> {
         let mut header = Header::new();
         try!(header.load(&mut buf));

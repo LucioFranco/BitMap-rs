@@ -12,7 +12,7 @@ pub struct EdgeDetection {
 
 impl EdgeDetection {
     fn compute_grey_scale(&self, img: &Image, x: u32, y: u32) -> u8 {
-        let mut neighbors = [0i8; 8];
+        let mut neighbors = [0i32; 8];
 
         neighbors[0] = self.compute_from_neighbor(img.get_pixel(x + 1, y));
         neighbors[1] = self.compute_from_neighbor(img.get_pixel(x - 1, y));
@@ -33,8 +33,8 @@ impl EdgeDetection {
         (((v_x.pow(2) + v_y.pow(2)) as f32).sqrt()) as u8
     }
 
-    fn compute_from_neighbor(&self, p: Pixel) -> i8 {
-        ((p.b + p.g + p.r) / 3) as i8
+    fn compute_from_neighbor(&self, p: Pixel) -> i32 {
+        ((p.b as i32 + p.g as i32 + p.r as i32) / 3)
     }
 }
 
